@@ -1,6 +1,16 @@
 import yfinance as yf
 
 
+def stock_exists(symbol):
+    ticker = yf.Ticker(symbol)
+    try:
+        stock_info = ticker.info
+        return True if 'symbol' in stock_info else False
+    except Exception as e:
+        print(e)
+        return False
+
+
 def get_stock_data(symbol: str):
     stock = yf.Ticker(symbol)
     data = stock.history(period="1mo")
@@ -21,13 +31,21 @@ def get_stock_general_info(symbol: str):
     return stock.info
 
 
-# tickers = yf.Tickers('msft aapl goog')
-#
-# a = tickers.tickers['MSFT'].info  # here Open, High, Low, Close, Volume, Dividends, Stock Splits
-# # for stock data we use the close value
-# b = tickers.tickers['AAPL'].history(period="1mo")
-# c = tickers.tickers['GOOG'].actions
-# # data = yf.download("SPY AAPL", period="1mo")
-#
-get_stock_general_info("AAPL")
-# # print(a, b, c)
+def get_top_stocks():
+    tickers = yf.Tickers('AAPL GOOGL AMZN NFLX ^GSPC TSLA NKE MSFT META BTC-USD ETH-USD ADA-USD DOGE-USD')
+    data = tickers.tickers
+
+    return [{
+        'name': data[ticker].info['shortName'],
+        'symbol': data[ticker].info['symbol'],
+    } for ticker in data]
+
+
+def get_stock_news(symbol: str):
+    stock = yf.Ticker(symbol)
+    return stock.news
+
+# s = yf.Ticker("AAPL")
+# print(s.fast_info.get('lastPrice'))
+# print(get_stock_general_info("^GSPC"))
+# print(get_top_stocks())

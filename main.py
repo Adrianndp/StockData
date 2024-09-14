@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import logging
-from stock_data import get_stock_data, get_stock_general_info
+from stock_data import get_stock_data, get_stock_general_info, stock_exists
 from typing import List, Dict, Any
 from pydantic import BaseModel
 
@@ -26,12 +26,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-stock_data = {
-    "AAPL": [],
-    "GOOGL": [2750.55, 2762.03, 2741.65, 2734.92, 2759.61],
-    "AMZN": [3470.05, 3493.21, 3455.64, 3438.18, 3489.34],
-}
-
 
 # test http://127.0.0.1:8000/stock_prices/?stock_name=AAPL
 @app.get("/stock_prices/", response_model=List[StockPrice])
@@ -42,7 +36,7 @@ def get_stock_prices(stock_name: str):
     :param stock_name: The name of the stock (e.g., AAPL, GOOGL).
     :return: A list of closing prices for the stock.
     """
-    if stock_name in stock_data:
+    if stock_exists(stock_name):
         return get_stock_data(stock_name)
     else:
         raise HTTPException(status_code=404, detail="Stock not found")
@@ -56,8 +50,7 @@ def get_stock_info(stock_name: str):
     :param stock_name: The name of the stock (e.g., AAPL, GOOGL).
     :return: A list of closing prices for the stock.
     """
-    if stock_name in stock_data:
+    if stock_exists(stock_name):
         return get_stock_general_info(stock_name)
     else:
         raise HTTPException(status_code=404, detail="Stock not found")
-
