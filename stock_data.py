@@ -1,4 +1,5 @@
 import yfinance as yf
+import requests
 
 
 def stock_exists(symbol):
@@ -32,20 +33,39 @@ def get_stock_general_info(symbol: str):
 
 
 def get_top_stocks():
-    tickers = yf.Tickers('AAPL GOOGL AMZN NFLX ^GSPC TSLA NKE MSFT META BTC-USD ETH-USD ADA-USD DOGE-USD')
+    tickers = yf.Tickers('AAPL GOOGL AMZN NFLX ^GSPC TSLA NKE MSFT META BTC-USD')
     data = tickers.tickers
+    output = {}
+    for ticker in data:
+        temp = {'name': data[ticker].info['shortName'],
+                'symbol': data[ticker].info['symbol'],
+                }
+        if data[ticker].info['quoteType'] == 'CRYPTOCURRENCY':
+            temp['price'] = get_coingecko_price(data[ticker].info['name'].lower())
+        elif data[ticker].info['quoteType'] == 'INDEX':
+            temp['price'] = data[ticker].history(period="1d")['Close'].iloc[0]
+        else:
+            temp['price'] = data[ticker].info['currentPrice']
+        previous_close = data[ticker].info['previousClose']
+        temp['change'] = temp['price'] - previous_close
+        temp['percentage_change'] = (temp['change'] / previous_close) * 100
+        output[data[ticker].info['symbol']] = temp
 
-    return [{
-        'name': data[ticker].info['shortName'],
-        'symbol': data[ticker].info['symbol'],
-    } for ticker in data]
+    return output
 
 
 def get_stock_news(symbol: str):
     stock = yf.Ticker(symbol)
     return stock.news
 
-# s = yf.Ticker("AAPL")
-# print(s.fast_info.get('lastPrice'))
-# print(get_stock_general_info("^GSPC"))
-# print(get_top_stocks())
+
+def get_coingecko_price(ticker):
+    url = f'https://api.coingecko.com/api/v3/simple/price?ids={ticker}&vs_currencies=usd'
+    response = requests.get(url)
+    if response.status_code == 429:  # Too many requests
+        print("Rate limit exceeded. Waiting for 60 seconds.")
+    data = response.json()
+    try:
+        return data[ticker]['usd']
+    except KeyError:
+        return

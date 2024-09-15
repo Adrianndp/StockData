@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import logging
-from stock_data import get_stock_data, get_stock_general_info, stock_exists
+from stock_data import get_stock_data, get_stock_general_info, stock_exists, get_top_stocks
 from typing import List, Dict, Any
 from pydantic import BaseModel
 
@@ -54,3 +54,9 @@ def get_stock_info(stock_name: str):
         return get_stock_general_info(stock_name)
     else:
         raise HTTPException(status_code=404, detail="Stock not found")
+
+
+@app.get("/top_stocks/", response_model=Dict[str, str])
+def get_top_stocks():
+    return "Testing top"
+    # return get_top_stocks
