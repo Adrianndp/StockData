@@ -49,6 +49,7 @@ def get_top_stocks():
         previous_close = data[ticker].info['previousClose']
         temp['change'] = temp['price'] - previous_close
         temp['percentage_change'] = (temp['change'] / previous_close) * 100
+        temp['image_name'] = data[ticker].info['symbol'].lower() + ".svg"
         output[data[ticker].info['symbol']] = temp
 
     return output

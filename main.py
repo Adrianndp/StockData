@@ -56,7 +56,6 @@ def get_stock_info(stock_name: str):
         raise HTTPException(status_code=404, detail="Stock not found")
 
 
-@app.get("/top_stocks/", response_model=Dict[str, str])
+@app.get("/top_stocks/", response_model=Dict[str, Dict])
 def get_top_stocks():
-    return "Testing top"
-    # return get_top_stocks
+    return get_top_stocks()
