@@ -12,7 +12,7 @@ def stock_exists(symbol):
         return False
 
 
-def get_stock_data(symbol: str):
+def get_stock_prices(symbol: str):
     stock = yf.Ticker(symbol)
     data = stock.history(period="1mo")
     if not data.empty:
@@ -27,7 +27,7 @@ def get_stock_data(symbol: str):
     return None
 
 
-def get_stock_general_info(symbol: str):
+def get_stock_info(symbol: str):
     stock = yf.Ticker(symbol)
     return stock.info
 
@@ -57,7 +57,15 @@ def get_top_stocks():
 
 def get_stock_news(symbol: str):
     stock = yf.Ticker(symbol)
-    return stock.news
+    news = stock.news
+    clean_data = []
+    for new in news:
+        if 'thumbnail' in new and 'resolutions' in new['thumbnail']:
+            image_url = next((thumb['url'] for thumb in new['thumbnail']['resolutions'] if thumb['width'] == 140), None)
+        else:
+            image_url = None
+        clean_data.append({'title': new['title'], 'url': new['link'], 'image_url': image_url})
+    return clean_data
 
 
 def get_coingecko_price(ticker):
